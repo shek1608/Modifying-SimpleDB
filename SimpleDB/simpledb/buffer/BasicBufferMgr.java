@@ -1,5 +1,8 @@
 package simpledb.buffer;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import simpledb.file.*;
 
 /**
@@ -10,6 +13,9 @@ import simpledb.file.*;
 class BasicBufferMgr {
    private Buffer[] bufferpool;
    private int numAvailable;
+   
+   //created a map here for task 1
+   private ConcurrentHashMap<Block, Buffer> bufferPoolMap;
    
    /**
     * Creates a buffer manager having the specified number 
@@ -26,6 +32,9 @@ class BasicBufferMgr {
     */
    BasicBufferMgr(int numbuffs) {
       bufferpool = new Buffer[numbuffs];
+      //Task 1
+      bufferPoolMap=new ConcurrentHashMap<Block, Buffer>();
+      //
       numAvailable = numbuffs;
       for (int i=0; i<numbuffs; i++)
          bufferpool[i] = new Buffer();
@@ -56,6 +65,17 @@ class BasicBufferMgr {
          buff = chooseUnpinnedBuffer();
          if (buff == null)
             return null;
+         
+         //Task 1
+         //deleting the map entry if the buffer was allocated previously
+         for(Map.Entry<Block,Buffer> mapEntry : bufferPoolMap.entrySet()){
+        	if(mapEntry.getValue()==buff)
+        		bufferPoolMap.remove(mapEntry.getKey());
+         }
+         //Now make a map entry
+         bufferPoolMap.put(blk, buff);
+         //Task 1
+         
          buff.assignToBlock(blk);
       }
       if (!buff.isPinned())
@@ -102,11 +122,20 @@ class BasicBufferMgr {
    }
    
    private Buffer findExistingBuffer(Block blk) {
-      for (Buffer buff : bufferpool) {
+      /*for (Buffer buff : bufferpool) {
          Block b = buff.block();
          if (b != null && b.equals(blk))
             return buff;
       }
+      return null;*/
+      
+	  //change for task 1
+      if(bufferPoolMap.containsKey(blk))
+      {
+		  System.out.println("Existing Mapping found for "+blk);
+		  return bufferPoolMap.get(blk);
+      }
+      //task 1
       return null;
    }
    
@@ -115,5 +144,24 @@ class BasicBufferMgr {
          if (!buff.isPinned())
          return buff;
       return null;
+   }
+   
+   //task 1 - adding the methods in specs
+   /**
+   * Determines whether the map has a mapping from
+   * the block to some buffer.
+   * @param blk the block to use as a key
+   * @return true if there is a mapping; false otherwise
+   */
+   boolean containsMapping(Block blk) {
+   return bufferPoolMap.containsKey(blk);
+   }
+   /**
+   * Returns the buffer that the map maps the specified block to.
+   * @param blk the block to use as a key
+   * @return the buffer mapped to if there is a mapping; null otherwise
+   */
+   Buffer getMapping(Block blk) {
+   return bufferPoolMap.get(blk);
    }
 }
