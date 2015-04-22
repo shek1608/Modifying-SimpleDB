@@ -102,10 +102,14 @@ class BasicBufferMgr {
    }
    
    private Buffer findExistingBuffer(Block blk) {
+	   
       for (Buffer buff : bufferpool) {
          Block b = buff.block();
          if (b != null && b.equals(blk))
+         {
+        	 System.out.println("Exising maping found for : " + blk);
             return buff;
+         }
       }
       return null;
    }

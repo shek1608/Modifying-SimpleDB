@@ -159,46 +159,67 @@ public class Page {
       contents.put(byteval);
    }
    
-   
-   public synchronized short getShort(int offset)
-   {
-	   contents.position(offset);
-	   return contents.getShort();
-   }
-   public synchronized void setShort(int offset, short val)
-   {
-	   contents.position(offset);
+   public synchronized short getShort(int offset) {
+	      contents.position(offset);
+	      return contents.getShort();
+}
+
+public synchronized void setShort(int offset, short val) {
+	      contents.position(offset);
 	      contents.putShort(val);
-   }
-   public synchronized boolean getBoolean(int offset)
-   {
-	   contents.position(offset);
-	   byte b = contents.get();
-	   boolean b1 = b!=0;
-	   return b1;
-   }
-   public synchronized void setBoolean(int offset, boolean val)
-   {
-	   contents.position(offset);
-	   byte b = (byte)(val?1:0);
-	   contents.put(b);
-   }
-   public synchronized byte[] getBytes(int offset)
-   {
+}
+
+public synchronized boolean getBoolean(int offset) {
+	      contents.position(offset);
+	      byte b = contents.get();
+	      boolean b1 = b==1;
+	      return b1;
+}
+
+public synchronized void setBoolean(int offset, boolean val) {
+	      contents.position(offset);
+	      byte b = (byte)(val?1:0);
+	      contents.put(b);
+}
+
+public synchronized byte[] getBytes(int offset) {
+	      contents.position(offset);
+	      int len = contents.getInt();
+	      byte[] byteval = new byte[len];
+	      contents.get(byteval);
+	      return byteval;
+ }
+
+ public synchronized void setBytes(int offset, byte[] val) {
+	      contents.position(offset);
+	      contents.putInt(val.length);
+	      contents.put(val);
+ }
+	
+	public synchronized Date getDate(int offset) {
+	      contents.position(offset);
+	      int len = contents.getInt();
+	      byte[] byteval = new byte[len];
+	      contents.get(byteval);
+	      String dt = new String(byteval);
+	      @SuppressWarnings("deprecation")
+	      Date date;
+	      try{
+	    	  date = new Date(dt);
+	      }
+	      catch(Exception e){
+	    	  System.out.println(e);
+	    	  date = new Date(0L);
+	      }
+	      return date;
+	}
 	   
-   }
-   public synchronized void setBytes(int offset, byte[] val)
-   {
-	   
-   }
-   public synchronized Date getDate(int offset)
-   {
-	   
-   }
-   public synchronized void setDate(int offset, Date val)
-   {
-	   
-   }
+	public synchronized void setDate(int offset, Date val) {
+	      contents.position(offset);
+	      byte[] byteval = val.toString().getBytes();
+	      contents.putInt(byteval.length);
+	      contents.put(byteval);
+	} 
    
    
 }
